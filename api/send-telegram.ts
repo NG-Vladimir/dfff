@@ -12,8 +12,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!token || !chatId) {
+    const missing = [];
+    if (!token) missing.push('TELEGRAM_BOT_TOKEN');
+    if (!chatId) missing.push('TELEGRAM_CHAT_ID');
     res.status(500).json({
-      error: 'Сервер не настроен. Добавьте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в настройках Vercel.',
+      error: `Сервер не настроен. Не заданы: ${missing.join(', ')}. Добавьте в Vercel → Settings → Environment Variables и сделайте Redeploy.`,
     });
     return;
   }
