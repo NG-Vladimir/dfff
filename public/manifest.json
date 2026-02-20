@@ -1,0 +1,18 @@
+{
+  "name": "График служения",
+  "short_name": "Служение",
+  "description": "Планирование служения — вторники и воскресенья",
+  "theme_color": "#f5f4f0",
+  "background_color": "#f5f4f0",
+  "display": "standalone",
+  "lang": "ru",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

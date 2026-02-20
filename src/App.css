@@ -1,0 +1,452 @@
+/* Liquid UI / Glassmorphism */
+:root {
+  --bg: linear-gradient(180deg, #f8f9fc 0%, #eef1f6 100%);
+  --text: #1a1d29;
+  --text-muted: #6b7280;
+  --primary: rgba(59, 130, 246, 0.4);
+  --primary-solid: #3b82f6;
+  --secondary: rgba(139, 92, 246, 0.4);
+  --success: rgba(34, 197, 94, 0.5);
+  --success-solid: #22c55e;
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.3);
+  --shadow-glow-green: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Tabs — liquid style */
+.nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 1.5rem;
+}
+
+.nav button {
+  padding: 0.6rem 1.25rem;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s;
+}
+
+.nav button:hover {
+  color: var(--text);
+}
+
+.nav button.active {
+  background: var(--primary);
+  color: var(--primary-solid);
+  font-weight: 600;
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.main {
+  flex: 1;
+  padding: 0 1.5rem 2rem;
+  max-width: 520px;
+}
+
+/* Settings — Add participant (icon button + text field) */
+.settings {
+  padding-top: 0.5rem;
+}
+
+.settings h2 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.add-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  cursor: text;
+}
+
+.add-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--success) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  box-shadow: var(--shadow-glow-green);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.add-btn:hover {
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.5) !important;
+}
+
+.add-name input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+}
+
+.add-name input::placeholder {
+  color: var(--text-muted);
+}
+
+.people-list {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+}
+
+.people-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.remove-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #dc2626 !important;
+  font-size: 1.2rem;
+  line-height: 1;
+  border: none !important;
+  border-radius: 8px;
+}
+
+.remove-btn:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+}
+
+/* Graph — Month nav */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.month-nav button {
+  padding: 0.6rem 1rem;
+  background: var(--glass) !important;
+  backdrop-filter: blur(12px);
+  color: var(--text) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+}
+
+.month-nav button:hover {
+  box-shadow: var(--shadow-glow-purple) !important;
+}
+
+.month-label {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Days sections */
+.days-section {
+  margin-bottom: 1.5rem;
+}
+
+.days-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.days-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.days-list li {
+  margin-bottom: 0.5rem;
+}
+
+.day-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s;
+}
+
+.day-item:hover {
+  box-shadow: var(--shadow-glow-purple);
+}
+
+.day-item.selected {
+  background: var(--secondary);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: var(--shadow-glow-purple);
+}
+
+.day-badge {
+  font-size: 0.75rem;
+  color: var(--success-solid);
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  background: rgba(34, 197, 94, 0.15);
+  border-radius: 6px;
+}
+
+/* Assignments panel — inside selected day */
+.assignments-panel {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.assignments-panel h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.close-day {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-muted) !important;
+  border: none !important;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.close-day:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+.panel-hint {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.role-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.875rem;
+}
+
+.role-row:last-child {
+  margin-bottom: 0;
+}
+
+.role-row label {
+  min-width: 100px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.role-row select {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.role-row select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-solid);
+}
+
+/* Graph actions — primary & secondary buttons */
+.graph-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.graph-actions button {
+  padding: 0.7rem 1.5rem;
+  background: var(--primary) !important;
+  backdrop-filter: blur(12px);
+  color: var(--primary-solid) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.graph-actions button:last-child {
+  background: var(--secondary) !important;
+  color: #7c3aed !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  box-shadow: var(--shadow-glow-purple);
+}
+
+.graph-actions button:hover {
+  opacity: 0.95;
+}
+
+/* Schedule modal — liquid style */
+.schedule-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.schedule-modal-content {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.5rem;
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+.schedule-modal-content h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.schedule-text {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+}
+
+.schedule-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-telegram {
+  padding: 0.65rem 1.25rem !important;
+  background: var(--primary) !important;
+  color: var(--primary-solid) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: var(--shadow-glow-blue) !important;
+}
+
+.btn-close {
+  padding: 0.65rem 1.25rem !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--glass-border) !important;
+}
