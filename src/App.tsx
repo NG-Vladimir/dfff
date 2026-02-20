@@ -28,20 +28,26 @@ function App() {
   const [scheduleType, setScheduleType] = useState<'week' | 'month' | null>(null);
   const [viewMonth, setViewMonth] = useState(new Date());
   const [sendStatus, setSendStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle');
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setPeople(loadPeople());
-    const loaded = loadAssignments();
-    setAssignments(loaded.map((a) => ({ ...a, slot: a.slot ?? 0 })));
+    (async () => {
+      const [p, a] = await Promise.all([loadPeople(), loadAssignments()]);
+      setPeople(p);
+      setAssignments(a);
+      setLoaded(true);
+    })();
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
     savePeople(people);
-  }, [people]);
+  }, [people, loaded]);
 
   useEffect(() => {
+    if (!loaded) return;
     saveAssignments(assignments);
-  }, [assignments]);
+  }, [assignments, loaded]);
 
   const addPerson = () => {
     const name = newPersonName.trim();
