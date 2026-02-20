@@ -17,4 +17,5 @@ export interface Assignment {
   date: string; // YYYY-MM-DD
   roleId: RoleId;
   personId: string;
+  slot?: number; // 0, 1, 2 — до 3 человек на роль
 }

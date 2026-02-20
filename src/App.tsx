@@ -12,7 +12,9 @@ import {
 } from './utils';
 import './App.css';
 
-type Tab = 'graph' | 'settings';
+const SLOTS_PER_ROLE = 3;
+
+type Tab = 'graph' | 'participants';
 
 function App() {
   const [tab, setTab] = useState<Tab>('graph');
@@ -26,7 +28,8 @@ function App() {
 
   useEffect(() => {
     setPeople(loadPeople());
-    setAssignments(loadAssignments());
+    const loaded = loadAssignments();
+    setAssignments(loaded.map((a) => ({ ...a, slot: a.slot ?? 0 })));
   }, []);
 
   useEffect(() => {
@@ -51,19 +54,27 @@ function App() {
   };
 
   const setAssignment = useCallback(
-    (dateKey: string, roleId: RoleId, personId: string) => {
+    (dateKey: string, roleId: RoleId, slot: number, personId: string) => {
       const filtered = assignments.filter(
-        (a) => !(a.date === dateKey && a.roleId === roleId)
+        (a) => !(a.date === dateKey && a.roleId === roleId && (a.slot ?? 0) === slot)
       );
-      if (personId) filtered.push({ date: dateKey, roleId, personId });
+      if (personId) filtered.push({ date: dateKey, roleId, personId, slot });
       setAssignments(filtered);
     },
     [assignments]
   );
 
-  const getAssignment = useCallback(
-    (dateKey: string, roleId: RoleId) =>
-      assignments.find((a) => a.date === dateKey && a.roleId === roleId)?.personId ?? '',
+  const getAssignmentsForRole = useCallback(
+    (dateKey: string, roleId: RoleId): string[] => {
+      const items = assignments
+        .filter((a) => a.date === dateKey && a.roleId === roleId)
+        .sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0));
+      const result: string[] = [];
+      for (let i = 0; i < SLOTS_PER_ROLE; i++) {
+        result.push(items.find((a) => (a.slot ?? 0) === i)?.personId ?? '');
+      }
+      return result;
+    },
     [assignments]
   );
 
@@ -77,14 +88,16 @@ function App() {
         const dayAssignments = assignments.filter((a) => a.date === dateKey);
         if (dayAssignments.length === 0) continue;
         lines.push(`\n📅 ${label} ${formatDateRu(date)}:`);
-        for (const { roleId, personId } of dayAssignments) {
-          const role = ROLES.find((r) => r.id === roleId)?.label ?? roleId;
-          lines.push(`   • ${role}: ${getPersonName(personId)}`);
+        for (const role of ROLES) {
+          const personIds = getAssignmentsForRole(dateKey, role.id).filter(Boolean);
+          if (personIds.length === 0) continue;
+          const names = personIds.map((id) => getPersonName(id)).join(', ');
+          lines.push(`   • ${role.label}: ${names}`);
         }
       }
       return lines.length ? '🎵 График служения\n' + lines.join('\n') : 'Нет назначений на выбранный период.';
     },
-    [assignments, people]
+    [assignments, people, getAssignmentsForRole]
   );
 
   const showWeekSchedule = () => {
@@ -110,6 +123,17 @@ function App() {
     setSchedulePreview('');
   };
 
+  const filledCount = useCallback(
+    (dateKey: string) => {
+      let count = 0;
+      for (const role of ROLES) {
+        count += getAssignmentsForRole(dateKey, role.id).filter(Boolean).length;
+      }
+      return count;
+    },
+    [getAssignmentsForRole]
+  );
+
   const tuesdays = getTuesdaysInMonth(viewMonth.getFullYear(), viewMonth.getMonth());
   const sundays = getSundaysInMonth(viewMonth.getFullYear(), viewMonth.getMonth());
   const monthLabel = viewMonth.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
@@ -131,17 +155,17 @@ function App() {
             График
           </button>
           <button
-            className={tab === 'settings' ? 'active' : ''}
-            onClick={() => setTab('settings')}
+            className={tab === 'participants' ? 'active' : ''}
+            onClick={() => setTab('participants')}
           >
-            Настройки
+            Участники
           </button>
         </nav>
       </header>
 
       <main className="main">
-        {tab === 'settings' && (
-          <section className="settings">
+        {tab === 'participants' && (
+          <section className="participants-section">
             <h2>Участники</h2>
             <div className="add-name" onClick={() => document.getElementById('add-name-input')?.focus()}>
               <button type="button" className="add-btn" onClick={addPerson} aria-label="Добавить">
@@ -169,7 +193,7 @@ function App() {
           </section>
         )}
 
-        {tab === 'graph' && (
+        {tab === 'graph' && !selectedDate && (
           <>
             <div className="month-nav">
               <button type="button" onClick={prevMonth}>←</button>
@@ -182,17 +206,18 @@ function App() {
               <ul className="days-list">
                 {tuesdays.map((date) => {
                   const dateKey = toDateKey(date);
-                  const filled = ROLES.filter((r) => getAssignment(dateKey, r.id)).length;
-                  const isSelected = selectedDate && toDateKey(selectedDate) === dateKey;
+                  const count = filledCount(dateKey);
                   return (
                     <li key={dateKey}>
                       <button
                         type="button"
-                        className={`day-item ${isSelected ? 'selected' : ''}`}
-                        onClick={() => setSelectedDate(selectedDate?.toString() === date.toString() ? null : date)}
+                        className="day-item"
+                        onClick={() => setSelectedDate(date)}
                       >
                         <span className="day-date">{formatDateShort(date)}</span>
-                        {filled > 0 && <span className="day-badge">{filled}/{ROLES.length}</span>}
+                        {count > 0 && (
+                          <span className="day-badge">{count}</span>
+                        )}
                       </button>
                     </li>
                   );
@@ -205,17 +230,18 @@ function App() {
               <ul className="days-list">
                 {sundays.map((date) => {
                   const dateKey = toDateKey(date);
-                  const filled = ROLES.filter((r) => getAssignment(dateKey, r.id)).length;
-                  const isSelected = selectedDate && toDateKey(selectedDate) === dateKey;
+                  const count = filledCount(dateKey);
                   return (
                     <li key={dateKey}>
                       <button
                         type="button"
-                        className={`day-item ${isSelected ? 'selected' : ''}`}
-                        onClick={() => setSelectedDate(selectedDate?.toString() === date.toString() ? null : date)}
+                        className="day-item"
+                        onClick={() => setSelectedDate(date)}
                       >
                         <span className="day-date">{formatDateShort(date)}</span>
-                        {filled > 0 && <span className="day-badge">{filled}/{ROLES.length}</span>}
+                        {count > 0 && (
+                          <span className="day-badge">{count}</span>
+                        )}
                       </button>
                     </li>
                   );
@@ -223,39 +249,46 @@ function App() {
               </ul>
             </section>
 
-            {!selectedDate && (
-              <p className="hint">Выберите день, затем назначьте роли и людей</p>
-            )}
-
-            {selectedDate && (
-              <section className="assignments-panel">
-                <h3>
-                  {formatDateRu(selectedDate)}
-                  <button type="button" className="close-day" onClick={() => setSelectedDate(null)} aria-label="Закрыть">×</button>
-                </h3>
-                <p className="panel-hint">Назначьте человека на каждую роль</p>
-                {ROLES.map((role) => (
-                  <div key={role.id} className="role-row">
-                    <label>{role.label}</label>
-                    <select
-                      value={getAssignment(toDateKey(selectedDate), role.id)}
-                      onChange={(e) => setAssignment(toDateKey(selectedDate), role.id, e.target.value)}
-                    >
-                      <option value="">—</option>
-                      {people.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-              </section>
-            )}
-
             <div className="graph-actions">
               <button type="button" onClick={showWeekSchedule}>График на неделю</button>
               <button type="button" onClick={showMonthSchedule}>График за месяц</button>
             </div>
           </>
+        )}
+
+        {tab === 'graph' && selectedDate && (
+          <div className="day-drilldown">
+            <div className="day-drilldown-header">
+              <button type="button" className="back-btn" onClick={() => setSelectedDate(null)}>
+                ← Назад
+              </button>
+              <h2>{formatDateRu(selectedDate)}</h2>
+              <p className="drilldown-hint">До 3 человек на каждую роль</p>
+            </div>
+            <div className="day-drilldown-content">
+              {ROLES.map((role) => (
+                <div key={role.id} className="role-block">
+                  <label className="role-label">{role.label}</label>
+                  <div className="role-slots">
+                    {[0, 1, 2].map((slot) => (
+                      <select
+                        key={slot}
+                        value={getAssignmentsForRole(toDateKey(selectedDate), role.id)[slot] ?? ''}
+                        onChange={(e) =>
+                          setAssignment(toDateKey(selectedDate), role.id, slot, e.target.value)
+                        }
+                      >
+                        <option value="">—</option>
+                        {people.map((p) => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {scheduleType && (
