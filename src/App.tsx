@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ROLES, type Person, type Assignment, type RoleId } from './types';
 import { loadPeople, savePeople, loadAssignments, saveAssignments } from './storage';
+import { MARCH_PEOPLE, buildMarchAssignments } from './seed-march';
 import {
   getServiceDatesInWeek,
   getServiceDatesInMonth,
@@ -13,7 +14,9 @@ import {
 import './App.css';
 
 function getSlotsForRole(roleId: string): number {
-  return roleId === 'backup' ? 3 : 1;
+  if (roleId === 'backup') return 3;
+  if (roleId === 'leading') return 2;
+  return 1;
 }
 
 type Tab = 'graph' | 'participants';
@@ -33,8 +36,15 @@ function App() {
   useEffect(() => {
     (async () => {
       const [p, a] = await Promise.all([loadPeople(), loadAssignments()]);
-      setPeople(p);
-      setAssignments(a);
+      if (p.length === 0 && a.length === 0) {
+        const newPeople = MARCH_PEOPLE;
+        const newAssignments = buildMarchAssignments();
+        setPeople(newPeople);
+        setAssignments(newAssignments);
+      } else {
+        setPeople(p);
+        setAssignments(a);
+      }
       setLoaded(true);
     })();
   }, []);
@@ -60,6 +70,15 @@ function App() {
   const removePerson = (id: string) => {
     setPeople(people.filter((p) => p.id !== id));
     setAssignments(assignments.filter((a) => a.personId !== id));
+  };
+
+  const importMarch = () => {
+    const existingIds = new Set(people.map((p) => p.id));
+    const newPeople = MARCH_PEOPLE.filter((p) => !existingIds.has(p.id));
+    const marchAssignments = buildMarchAssignments();
+    const otherAssignments = assignments.filter((a) => !a.date.startsWith('2026-03'));
+    setPeople([...people, ...newPeople]);
+    setAssignments([...otherAssignments, ...marchAssignments]);
   };
 
   const setAssignment = useCallback(
@@ -218,6 +237,9 @@ function App() {
                 onKeyDown={(e) => e.key === 'Enter' && addPerson()}
               />
             </div>
+            <button type="button" className="import-btn" onClick={importMarch}>
+              Импортировать март
+            </button>
             {people.length > 0 && (
               <ul className="people-list">
                 {people.map((p) => (
@@ -301,7 +323,7 @@ function App() {
                 ← Назад
               </button>
               <h2>{formatDateRu(selectedDate)}</h2>
-              <p className="drilldown-hint">Back Vocal: до 3 человек, остальные роли: 1 человек</p>
+              <p className="drilldown-hint">Ведущий: до 2, Back Vocal: до 3, остальные: 1 человек</p>
             </div>
             <div className="day-drilldown-content">
               {ROLES.map((role) => (
