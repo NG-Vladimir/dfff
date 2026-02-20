@@ -12,8 +12,6 @@ import {
 } from './utils';
 import './App.css';
 
-const TELEGRAM_GROUP = 'https://t.me/+WtexZQK41bc4MTYy';
-
 function getSlotsForRole(roleId: string): number {
   return roleId === 'backup' ? 3 : 1;
 }
@@ -29,7 +27,7 @@ function App() {
   const [schedulePreview, setSchedulePreview] = useState<string>('');
   const [scheduleType, setScheduleType] = useState<'week' | 'month' | null>(null);
   const [viewMonth, setViewMonth] = useState(new Date());
-  const [copied, setCopied] = useState(false);
+  const [sendStatus, setSendStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle');
 
   useEffect(() => {
     setPeople(loadPeople());
@@ -121,12 +119,32 @@ function App() {
 
   const sendToTelegram = async () => {
     if (!schedulePreview) return;
+    setSendStatus('sending');
     try {
-      await navigator.clipboard.writeText(schedulePreview);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      window.open(TELEGRAM_GROUP, '_blank');
-    } catch {
+      const base = window.location.origin;
+      const res = await fetch(`${base}/api/send-telegram`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: schedulePreview }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setSendStatus('ok');
+        setTimeout(() => setSendStatus('idle'), 3000);
+      } else {
+        const msg = data?.error || 'Ошибка отправки';
+        setSendStatus('error');
+        setTimeout(() => setSendStatus('idle'), 5000);
+        if (msg.includes('не настроен') || msg.includes('TELEGRAM')) {
+          navigator.clipboard.writeText(schedulePreview).catch(() => {});
+          window.open('https://t.me/+WtexZQK41bc4MTYy', '_blank');
+        }
+        alert(msg);
+      }
+    } catch (e) {
+      setSendStatus('error');
+      setTimeout(() => setSendStatus('idle'), 5000);
+      navigator.clipboard.writeText(schedulePreview).catch(() => {});
       window.open(`https://t.me/share/url?text=${encodeURIComponent(schedulePreview)}`, '_blank');
     }
   };
@@ -134,7 +152,7 @@ function App() {
   const closeSchedulePreview = () => {
     setScheduleType(null);
     setSchedulePreview('');
-    setCopied(false);
+    setSendStatus('idle');
   };
 
   const filledCount = useCallback(
@@ -311,9 +329,15 @@ function App() {
               <h3>{scheduleType === 'week' ? 'График на неделю' : 'График за месяц'}</h3>
               <pre className="schedule-text">{schedulePreview}</pre>
               <div className="schedule-modal-actions">
-                {copied && <span className="copied-toast">Скопировано! Вставьте в группу (Ctrl+V)</span>}
-                <button type="button" className="btn-telegram" onClick={sendToTelegram}>
-                  Скопировать и открыть группу
+                {sendStatus === 'ok' && <span className="send-toast success">Отправлено!</span>}
+                {sendStatus === 'error' && <span className="send-toast error">Не отправлено. Скопируйте вручную.</span>}
+                <button
+                  type="button"
+                  className="btn-telegram"
+                  onClick={sendToTelegram}
+                  disabled={sendStatus === 'sending'}
+                >
+                  {sendStatus === 'sending' ? 'Отправка…' : 'Отправить в группу'}
                 </button>
                 <button type="button" className="btn-close" onClick={closeSchedulePreview}>
                   Закрыть

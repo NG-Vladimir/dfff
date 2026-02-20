@@ -536,10 +536,17 @@ body {
   gap: 0.5rem;
 }
 
-.copied-toast {
-  font-size: 0.85rem;
-  color: var(--success-solid);
+.send-toast {
+  font-size: 0.9rem;
   font-weight: 500;
+}
+
+.send-toast.success {
+  color: var(--success-solid);
+}
+
+.send-toast.error {
+  color: #dc2626;
 }
 
 .btn-telegram {
