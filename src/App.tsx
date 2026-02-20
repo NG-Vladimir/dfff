@@ -12,7 +12,11 @@ import {
 } from './utils';
 import './App.css';
 
-const SLOTS_PER_ROLE = 3;
+const TELEGRAM_GROUP = 'https://t.me/+WtexZQK41bc4MTYy';
+
+function getSlotsForRole(roleId: string): number {
+  return roleId === 'backup' ? 3 : 1;
+}
 
 type Tab = 'graph' | 'participants';
 
@@ -25,6 +29,7 @@ function App() {
   const [schedulePreview, setSchedulePreview] = useState<string>('');
   const [scheduleType, setScheduleType] = useState<'week' | 'month' | null>(null);
   const [viewMonth, setViewMonth] = useState(new Date());
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setPeople(loadPeople());
@@ -66,11 +71,12 @@ function App() {
 
   const getAssignmentsForRole = useCallback(
     (dateKey: string, roleId: RoleId): string[] => {
+      const slots = getSlotsForRole(roleId);
       const items = assignments
         .filter((a) => a.date === dateKey && a.roleId === roleId)
         .sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0));
       const result: string[] = [];
-      for (let i = 0; i < SLOTS_PER_ROLE; i++) {
+      for (let i = 0; i < slots; i++) {
         result.push(items.find((a) => (a.slot ?? 0) === i)?.personId ?? '');
       }
       return result;
@@ -113,14 +119,22 @@ function App() {
     setScheduleType('month');
   };
 
-  const sendToTelegram = () => {
+  const sendToTelegram = async () => {
     if (!schedulePreview) return;
-    window.open(`https://t.me/share/url?text=${encodeURIComponent(schedulePreview)}`, '_blank');
+    try {
+      await navigator.clipboard.writeText(schedulePreview);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      window.open(TELEGRAM_GROUP, '_blank');
+    } catch {
+      window.open(`https://t.me/share/url?text=${encodeURIComponent(schedulePreview)}`, '_blank');
+    }
   };
 
   const closeSchedulePreview = () => {
     setScheduleType(null);
     setSchedulePreview('');
+    setCopied(false);
   };
 
   const filledCount = useCallback(
@@ -263,14 +277,14 @@ function App() {
                 ← Назад
               </button>
               <h2>{formatDateRu(selectedDate)}</h2>
-              <p className="drilldown-hint">До 3 человек на каждую роль</p>
+              <p className="drilldown-hint">Бэк вокал: до 3 человек, остальные роли: 1 человек</p>
             </div>
             <div className="day-drilldown-content">
               {ROLES.map((role) => (
                 <div key={role.id} className="role-block">
                   <label className="role-label">{role.label}</label>
                   <div className="role-slots">
-                    {[0, 1, 2].map((slot) => (
+                    {Array.from({ length: getSlotsForRole(role.id) }, (_, slot) => (
                       <select
                         key={slot}
                         value={getAssignmentsForRole(toDateKey(selectedDate), role.id)[slot] ?? ''}
@@ -297,8 +311,9 @@ function App() {
               <h3>{scheduleType === 'week' ? 'График на неделю' : 'График за месяц'}</h3>
               <pre className="schedule-text">{schedulePreview}</pre>
               <div className="schedule-modal-actions">
+                {copied && <span className="copied-toast">Скопировано! Вставьте в группу (Ctrl+V)</span>}
                 <button type="button" className="btn-telegram" onClick={sendToTelegram}>
-                  Отправить в Telegram
+                  Скопировать и открыть группу
                 </button>
                 <button type="button" className="btn-close" onClick={closeSchedulePreview}>
                   Закрыть

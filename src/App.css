@@ -531,7 +531,15 @@ body {
 
 .schedule-modal-actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.copied-toast {
+  font-size: 0.85rem;
+  color: var(--success-solid);
+  font-weight: 500;
 }
 
 .btn-telegram {
