@@ -19,7 +19,7 @@
 ## 3. Узнать chat_id группы
 
 1. Напишите в группе любое сообщение
-2. Откройте в браузере: `https://api.telegram.org/bot<ВАШ_ТОКЕН>/getUpdates`
+2. Откройте в браузере: `https://api.telegram.org/bot<8497281247:AAHP_TQoMs-g60CGiHqoDYt4DZZkdDWdlJM>/getUpdates`
 3. В ответе найдите `"chat":{"id":-1001234567890,...}` — это chat_id (отрицательное число)
 
 ## 4. Добавить переменные в Vercel
