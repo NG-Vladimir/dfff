@@ -1,11 +1,12 @@
-export type RoleId = 'leading' | 'guitarist' | 'keyboardist' | 'drummer' | 'backup';
+export type RoleId = 'leading' | 'keyboardist' | 'guitarist' | 'backup' | 'drummer' | 'bass';
 
-export const ROLES: { id: RoleId; label: string }[] = [
-  { id: 'leading', label: 'Ведущий' },
-  { id: 'guitarist', label: 'Гитарист' },
-  { id: 'keyboardist', label: 'Клавишный' },
-  { id: 'drummer', label: 'Барабанщик' },
-  { id: 'backup', label: 'Бэк вокал' },
+export const ROLES: { id: RoleId; label: string; emoji: string }[] = [
+  { id: 'leading', label: 'Ведущий', emoji: '🎤' },
+  { id: 'keyboardist', label: 'Клавиши', emoji: '🎹' },
+  { id: 'guitarist', label: 'Гитара', emoji: '🎸' },
+  { id: 'backup', label: 'Back Vocal', emoji: '🎙️' },
+  { id: 'drummer', label: 'Барабанщик', emoji: '🥁' },
+  { id: 'bass', label: 'Бас', emoji: '🎵' },
 ];
 
 export interface Person {

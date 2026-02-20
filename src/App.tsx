@@ -102,7 +102,7 @@ function App() {
           const personIds = getAssignmentsForRole(dateKey, role.id).filter(Boolean);
           if (personIds.length === 0) continue;
           const names = personIds.map((id) => getPersonName(id)).join(', ');
-          lines.push(`   • ${role.label}: ${names}`);
+          lines.push(`   • ${role.emoji} ${role.label}: ${names}`);
         }
       }
       return lines.length ? '🎵 График служения\n' + lines.join('\n') : 'Нет назначений на выбранный период.';
@@ -301,7 +301,7 @@ function App() {
                 ← Назад
               </button>
               <h2>{formatDateRu(selectedDate)}</h2>
-              <p className="drilldown-hint">Бэк вокал: до 3 человек, остальные роли: 1 человек</p>
+              <p className="drilldown-hint">Back Vocal: до 3 человек, остальные роли: 1 человек</p>
             </div>
             <div className="day-drilldown-content">
               {ROLES.map((role) => (
